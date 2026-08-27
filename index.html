@@ -1,0 +1,485 @@
+import json, re
+
+with open('/home/claude/b64.json') as f:
+    B = json.load(f)
+
+products = [
+    dict(
+        id="nuvem",
+        nome="Nuvem de Algodão",
+        tipo="Máscara de Hidratação",
+        preco="R$ 35,00",
+        img=B['nuvem_de_algodao'],
+        bg="#dff0fb", bg2="#c7e6f9", accent="#2f8fc9", accentDark="#1f6f9e",
+        chips=["Manteiga de Karité", "Manteiga de Murumuru", "Óleo de Abacate", "Sem parabenos", "Testada por dermatologistas"],
+        composicao="Minha receitinha tem Manteiga de Karité, Manteiga de Murumuru e Óleo de Abacate — só coisa boa pra nutrir e hidratar bem profundinho cada fio! Sou livre de parabenos, corantes e ativos agressivos, e já passei por teste dermatológico.",
+        paraServe="Eu deixo os cabelos macios, brilhantes e fáceis de pentear! Sou uma máscara de nutrição profunda, ideal pra todos os tipos de cabelo infantil — use uma vez por semana pra manter os fios sempre fofinhos, como uma nuvem de algodão.",
+    ),
+    dict(
+        id="planeta",
+        nome="Planeta Cachos",
+        tipo="Shampoo, Condicionador e Creme de Pentear",
+        preco="R$ 21,80 cada",
+        img=B['planeta_cachos'],
+        bg="#fdead2", bg2="#fbdcb0", accent="#e8873a", accentDark="#c46a20",
+        chips=["Manteiga de Karité", "Manteiga de Murumuru", "Óleo de Abacate", "Sem parabenos", "Testado por dermatologistas"],
+        composicao="Uso Manteiga de Karité, Manteiga de Murumuru e Óleo de Abacate, que repõem os lipídios e mantêm a umidade natural dos cachinhos de vocês.",
+        paraServe="Eu defino os cachos sem pesar, nutro e hidrato bem profundo, facilito o desembaraço e reduzo o frizz. É só usar todo dia pra ter cachos soltinhos, hidratados e cheios de vida!",
+    ),
+    dict(
+        id="astro",
+        nome="Astro Fix",
+        tipo="Gel de Fixação",
+        preco="R$ 20,00 cada",
+        img=B['astro_fix'],
+        bg="#e7eff6", bg2="#d3e3ee", accent="#4d7fa3", accentDark="#345d7a",
+        chips=["Fixação leve", "Cheirinho de maçã verde", "Não resseca", "Sem resíduos", "Testado por dermatologistas"],
+        composicao="Minha fórmula tem fixação leve e flexível, cheirinho gostoso de maçã verde, e não deixo resíduo nenhum nem ressecamento.",
+        paraServe="Eu ajudo a modelar o cabelo com brilho natural e radiante, sem ficar duro nem pesado. Ideal pro dia a dia, em qualquer tipo de cabelo infantil!",
+    ),
+    dict(
+        id="estrela",
+        nome="Estrela Cadente",
+        tipo="Gel Glitter",
+        preco="R$ 21,80 cada",
+        img=B['estrela_cadente'],
+        bg="#fbe3ee", bg2="#f8cfe3", accent="#df5b98", accentDark="#b83c76",
+        chips=["Brilho com glitter", "Cheirinho de maçã verde", "Fácil de remover", "Não resseca", "Testado por dermatologistas"],
+        composicao="Sou um gel glitter com fixação levinha, cheirinho refrescante de maçã verde e um brilho mágico, sem ressecar nem deixar resíduos.",
+        paraServe="Deixo o penteado com efeito molhadinho e cheio de brilho — perfeito pra festas e momentos especiais! Fácil de aplicar e também fácil de remover.",
+    ),
+    dict(
+        id="aurora",
+        nome="Aurora Boreal",
+        tipo="Shampoo e Condicionador",
+        preco="R$ 22,20 cada",
+        img=B['aurora_boreal'],
+        bg="#e6e4f7", bg2="#d3d0f0", accent="#5654a8", accentDark="#3d3b7d",
+        chips=["Aloe Vera", "Camomila", "Óleo essencial de Lavanda", "Fórmula sem lágrimas", "Sem parabenos"],
+        composicao="Tenho Aloe Vera, Camomila e um toque de óleo essencial de Lavanda, numa fórmula sem lágrimas — livre de parabenos, corantes e ativos agressivos.",
+        paraServe="Eu limpo e hidrato os fios com muito carinho, sem irritar os olhinhos, e deixo um cheirinho calmante de lavanda no ar. Uso diário pra deixar a hora do banho ainda mais tranquila!",
+    ),
+    dict(
+        id="raio",
+        nome="Raio Desembaraçante",
+        tipo="Fluido Desembaraçante",
+        preco="R$ 20,00 cada",
+        img=B['raio_desembaracante'],
+        bg="#fde3d1", bg2="#fbceae", accent="#e17332", accentDark="#bd551b",
+        chips=["Pantenol", "Aloe Vera", "Camomila", "Não precisa enxaguar", "Fórmula leve"],
+        composicao="Levo Pantenol, Aloe Vera e Camomila numa fórmula levinha, sem óleo e sem precisar enxaguar depois.",
+        paraServe="Eu desembaraço na hora! Facilito o pentear, reduzo o frizz e deixo os fios macios e brilhantes, sem puxão e sem lágrimas. Respeito bem a sensibilidade do couro cabeludo de vocês.",
+    ),
+    dict(
+        id="cera",
+        nome="Cera Meteoro",
+        tipo="Cera Modeladora",
+        preco="R$ 23,00 cada",
+        img=B['cera_meteoro'],
+        bg="#e1f4e2", bg2="#c9ecc9", accent="#3f9a46", accentDark="#2c7332",
+        chips=["Cera de Abelha", "Manteiga de Karité", "Controla o frizz", "Não resseca", "Ideal pro dia a dia"],
+        composicao="Minha fórmula suave é enriquecida com Cera de Abelha e Manteiga de Karité.",
+        paraServe="Eu ajudo a controlar o frizz, alinhar os fios e definir penteados com bastante leveza, sem pesar nem ressecar. Perfeita pro dia a dia, festas ou brincadeiras!",
+    ),
+]
+
+def esc(s):
+    return s.replace("'", "\\'")
+
+cards_html = []
+modals_html = []
+for p in products:
+    chips_html = "".join(f'<span class="chip">{c}</span>' for c in p['chips'])
+    cards_html.append(f'''
+        <button class="card" style="--bg:{p['bg']};--bg2:{p['bg2']};--accent:{p['accent']};--accentDark:{p['accentDark']}" data-id="{p['id']}" onclick="openModal('{p['id']}')">
+          <div class="card-photo">
+            <img src="data:image/jpeg;base64,{p['img']}" alt="Mascote {p['nome']}" loading="lazy">
+          </div>
+          <div class="card-body">
+            <span class="card-tipo">{p['tipo']}</span>
+            <h3 class="card-nome">{p['nome']}</h3>
+            <span class="card-preco">{p['preco']}</span>
+          </div>
+          <span class="card-cta">Ver detalhes ✦</span>
+        </button>
+    ''')
+
+    modals_html.append(f'''
+      <div class="modal" id="modal-{p['id']}" style="--bg:{p['bg']};--bg2:{p['bg2']};--accent:{p['accent']};--accentDark:{p['accentDark']}" role="dialog" aria-modal="true" aria-labelledby="title-{p['id']}">
+        <div class="modal-card">
+          <button class="modal-close" onclick="closeModal('{p['id']}')" aria-label="Fechar">✕</button>
+          <div class="modal-visual">
+            <img src="data:image/jpeg;base64,{p['img']}" alt="Mascote {p['nome']}">
+          </div>
+          <div class="modal-info">
+            <span class="modal-tipo">{p['tipo']}</span>
+            <h2 id="title-{p['id']}" class="modal-nome">{p['nome']}</h2>
+            <span class="modal-preco">{p['preco']}</span>
+
+            <div class="chipwrap">{chips_html}</div>
+
+            <div class="tabs">
+              <button class="tabbtn active" data-tab="serve" onclick="switchTab('{p['id']}','serve')">✨ Pra que serve</button>
+              <button class="tabbtn" data-tab="comp" onclick="switchTab('{p['id']}','comp')">🧪 Composição</button>
+            </div>
+
+            <div class="bubble">
+              <p class="bubble-text" data-tab-content="serve">{p['paraServe']}</p>
+              <p class="bubble-text" data-tab-content="comp" hidden>{p['composicao']}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ''')
+
+cards_joined = "\n".join(cards_html)
+modals_joined = "\n".join(modals_html)
+hero_b64 = B['hero_kids']
+
+html = '''<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmile Kids — Cuidado, diversão e autoestima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple:#8b6fd1;
+    --pink:#f2a6c9;
+    --peach:#fbd9ad;
+    --skyt:#a7d8f0;
+    --ink:#2c2a4a;
+    --paper:#fffaf3;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,255,255,.55), transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(255,255,255,.4), transparent 35%),
+      linear-gradient(160deg, #cdb8ec 0%, #f0b8d3 32%, #fbd6b0 60%, #ffe9cf 100%);
+    background-attachment:fixed;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{ font-family:'Baloo 2', cursive; }
+
+  /* --- Estrelinhas decorativas --- */
+  .stars{
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .stars span{
+    position:absolute; display:block; color:#fff; opacity:.8; filter:drop-shadow(0 0 4px rgba(255,255,255,.8));
+    animation: twinkle 3.2s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.25; transform:scale(.8);} 50%{opacity:1; transform:scale(1.15);} }
+
+  /* --- Header --- */
+  header{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px clamp(16px,4vw,48px);
+    background:rgba(255,250,243,.72);
+    backdrop-filter:blur(10px);
+    border-bottom:2px solid rgba(139,111,209,.18);
+  }
+  .logo{
+    display:flex; align-items:center; gap:8px;
+    font-size:clamp(22px,3.2vw,30px);
+    font-weight:800; color:var(--ink); letter-spacing:.5px; line-height:1;
+    text-decoration:none;
+  }
+  .logo .dot{ color:var(--purple); }
+  .logo small{
+    display:block; font-family:'Nunito',sans-serif; font-weight:700; font-size:11px;
+    letter-spacing:2px; color:#c46a9a; text-transform:uppercase; margin-top:-2px;
+  }
+  .contact{
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(90deg,#6a5acd,#c86bb0);
+    color:#fff; padding:9px 16px; border-radius:999px;
+    font-weight:700; font-size:14px; text-decoration:none; white-space:nowrap;
+    box-shadow:0 6px 14px rgba(106,90,205,.35);
+  }
+  .contact span.ig{ font-size:16px; }
+
+  /* --- Hero --- */
+  .hero{
+    position:relative; z-index:1;
+    display:grid; grid-template-columns: 1.1fr 1fr; align-items:center; gap:24px;
+    max-width:1180px; margin:0 auto; padding:48px clamp(16px,4vw,48px) 20px;
+  }
+  .hero-text .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    background:#fff; color:#c8508e; font-weight:800; font-size:13px;
+    padding:6px 14px; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.08);
+    margin-bottom:16px;
+  }
+  .hero-text h1{
+    font-size:clamp(34px,5.4vw,58px); line-height:1.02; margin:0 0 14px;
+    color:var(--ink);
+  }
+  .hero-text h1 .accent{ color:#8b6fd1; }
+  .hero-text p{
+    font-size:clamp(15px,1.7vw,18px); line-height:1.55; color:#4a4768;
+    max-width:46ch; margin:0 0 24px;
+  }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
+  .btn-primary{
+    background:linear-gradient(90deg,#f28cb4,#f4b06b);
+    color:#402a1c; font-weight:800; font-size:15px;
+    padding:14px 26px; border-radius:999px; text-decoration:none;
+    box-shadow:0 10px 22px rgba(242,140,180,.45);
+    border:none; cursor:pointer; transition:transform .15s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); }
+  .btn-secondary{
+    background:#fff; color:var(--ink); font-weight:800; font-size:15px;
+    padding:14px 22px; border-radius:999px; text-decoration:none;
+    border:2px solid rgba(139,111,209,.35);
+  }
+  .hero-img{ position:relative; }
+  .hero-img img{
+    width:100%; max-width:460px; display:block; margin:0 auto;
+    filter:drop-shadow(0 22px 30px rgba(60,40,90,.25));
+  }
+  .badge-float{
+    position:absolute; background:#fff; border-radius:16px; padding:10px 14px;
+    box-shadow:0 10px 20px rgba(60,40,90,.18); font-weight:800; font-size:13px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .badge-1{ top:6%; right:-2%; color:#3f9a46; }
+  .badge-2{ bottom:10%; left:-4%; color:#df5b98; }
+
+  /* --- Section heading --- */
+  .section-head{ text-align:center; max-width:640px; margin:10px auto 8px; padding:0 16px; position:relative; z-index:1; }
+  .section-head .kicker{
+    font-weight:800; letter-spacing:2px; text-transform:uppercase; font-size:12px; color:#8b6fd1;
+  }
+  .section-head h2{ font-size:clamp(26px,4vw,38px); margin:8px 0 10px; }
+  .section-head p{ color:#4a4768; font-size:15px; line-height:1.5; }
+
+  /* --- Grid de produtos --- */
+  .grid{
+    position:relative; z-index:1;
+    max-width:1180px; margin:24px auto 60px; padding:0 clamp(16px,4vw,48px);
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:20px;
+  }
+  .card{
+    all:unset; cursor:pointer;
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    background:linear-gradient(180deg,var(--bg),var(--bg2));
+    border-radius:26px; padding:18px 16px 20px;
+    border:3px solid #fff;
+    box-shadow:0 10px 0 rgba(0,0,0,.05), 0 14px 24px rgba(60,40,90,.12);
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s ease;
+  }
+  .card:hover, .card:focus-visible{
+    transform:translateY(-8px) rotate(-1deg);
+    box-shadow:0 10px 0 rgba(0,0,0,.05), 0 22px 30px rgba(60,40,90,.2);
+  }
+  .card-photo{
+    width:100%; aspect-ratio:1/1; border-radius:20px; overflow:hidden;
+    background:#fff; margin-bottom:12px; border:3px solid #fff;
+    box-shadow:0 6px 14px rgba(0,0,0,.08);
+  }
+  .card-photo img{ width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+  .card-tipo{ font-size:11.5px; font-weight:700; color:var(--accentDark); text-transform:uppercase; letter-spacing:.5px; }
+  .card-nome{ font-size:19px; margin:2px 0 6px; color:var(--ink); }
+  .card-preco{
+    display:inline-block; font-weight:800; font-size:13.5px; color:#fff;
+    background:var(--accent); padding:4px 12px; border-radius:999px; margin-bottom:10px;
+  }
+  .card-cta{ font-size:12.5px; font-weight:800; color:var(--accentDark); opacity:.85; }
+
+  /* --- Faixa "linha completa" --- */
+  .strip{
+    position:relative; z-index:1; max-width:1180px; margin:0 auto 60px; padding:0 clamp(16px,4vw,48px);
+  }
+  .strip-inner{
+    background:rgba(255,255,255,.6); border:2px dashed rgba(139,111,209,.4);
+    border-radius:24px; padding:26px 28px; text-align:center;
+  }
+  .strip-inner h3{ margin:0 0 6px; font-size:22px; }
+  .strip-inner p{ margin:0; color:#4a4768; font-size:14.5px; }
+
+  /* --- Modal --- */
+  .modal{
+    position:fixed; inset:0; z-index:100; display:none;
+    align-items:center; justify-content:center; padding:20px;
+    background:rgba(40,26,58,.55); backdrop-filter:blur(3px);
+  }
+  .modal.open{ display:flex; }
+  .modal-card{
+    position:relative; width:100%; max-width:760px; max-height:92vh; overflow:auto;
+    background:linear-gradient(180deg,var(--bg),#fff 60%);
+    border-radius:28px; padding:0; display:grid; grid-template-columns:1fr 1.2fr;
+    box-shadow:0 30px 60px rgba(20,10,40,.4);
+    animation:pop .32s cubic-bezier(.34,1.56,.64,1);
+    border:4px solid #fff;
+  }
+  @keyframes pop{ from{ transform:scale(.85); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .modal-close{
+    position:absolute; top:12px; right:12px; z-index:5;
+    width:36px; height:36px; border-radius:50%; border:none; cursor:pointer;
+    background:#fff; color:var(--ink); font-size:16px; font-weight:800;
+    box-shadow:0 6px 14px rgba(0,0,0,.18);
+  }
+  .modal-visual{
+    background:linear-gradient(180deg,var(--bg2),var(--bg));
+    display:flex; align-items:flex-end; justify-content:center; padding:18px 10px 0;
+  }
+  .modal-visual img{ width:100%; max-width:280px; display:block; }
+  .modal-info{ padding:26px 26px 30px; display:flex; flex-direction:column; }
+  .modal-tipo{ font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--accentDark); }
+  .modal-nome{ font-size:clamp(24px,3vw,30px); margin:4px 0 8px; }
+  .modal-preco{
+    align-self:flex-start; font-weight:800; font-size:14px; color:#fff;
+    background:var(--accent); padding:5px 14px; border-radius:999px; margin-bottom:14px;
+  }
+  .chipwrap{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+  .chip{
+    font-size:11.5px; font-weight:700; color:var(--accentDark);
+    background:rgba(255,255,255,.75); border:1.5px solid var(--accent);
+    padding:4px 10px; border-radius:999px;
+  }
+  .tabs{ display:flex; gap:8px; margin-bottom:12px; }
+  .tabbtn{
+    flex:1; cursor:pointer; border:2px solid var(--accent); background:#fff;
+    color:var(--accentDark); font-weight:800; font-size:13px; padding:9px 10px;
+    border-radius:14px; font-family:'Nunito',sans-serif; transition:all .15s ease;
+  }
+  .tabbtn.active{ background:var(--accent); color:#fff; }
+  .bubble{
+    position:relative; background:#fff; border-radius:18px; padding:16px 18px;
+    box-shadow:0 6px 16px rgba(0,0,0,.08); min-height:96px;
+  }
+  .bubble:before{
+    content:""; position:absolute; top:-9px; left:34px; width:18px; height:18px;
+    background:#fff; transform:rotate(45deg); box-shadow:-3px -3px 6px rgba(0,0,0,.02);
+  }
+  .bubble-text{ margin:0; font-size:14.5px; line-height:1.6; color:#3a3752; }
+
+  /* --- Footer --- */
+  footer{
+    position:relative; z-index:1; text-align:center; padding:30px 16px 40px; color:#4a3f66;
+  }
+  footer .foot-logo{ font-size:20px; font-weight:800; margin-bottom:6px; }
+  footer .foot-contact{ font-size:14px; font-weight:700; }
+  footer .foot-note{ font-size:12px; opacity:.7; margin-top:10px; }
+
+  @media (max-width: 720px){
+    .hero{ grid-template-columns:1fr; text-align:center; }
+    .hero-text p{ margin-left:auto; margin-right:auto; }
+    .hero-ctas{ justify-content:center; }
+    .badge-1, .badge-2{ display:none; }
+    .modal-card{ grid-template-columns:1fr; }
+    .modal-visual img{ max-width:200px; }
+    .contact span.txt{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" aria-hidden="true">
+  <span style="top:8%; left:6%; font-size:14px; animation-delay:.2s;">✦</span>
+  <span style="top:18%; left:22%; font-size:10px; animation-delay:1.1s;">✦</span>
+  <span style="top:6%; left:48%; font-size:12px; animation-delay:.6s;">✧</span>
+  <span style="top:14%; left:72%; font-size:16px; animation-delay:1.6s;">✦</span>
+  <span style="top:4%; left:88%; font-size:10px; animation-delay:.9s;">✧</span>
+  <span style="top:30%; left:4%; font-size:10px; animation-delay:2s;">✧</span>
+  <span style="top:26%; left:92%; font-size:14px; animation-delay:.4s;">✦</span>
+</div>
+
+<header>
+  <a href="#topo" class="logo">CoSmile Kids<small>Cuidado &amp; diversão</small></a>
+  <a class="contact" href="https://wa.me/5562394234" target="_blank" rel="noopener">
+    <span class="ig">💬</span><span class="txt">@cosmilekids · (62) 3942-3434</span>
+  </a>
+</header>
+
+<section class="hero" id="topo">
+  <div class="hero-text">
+    <span class="eyebrow">🚀 Cuidado, diversão e autoestima</span>
+    <h1>Cabelos incríveis, <span class="accent">infâncias</span> ainda melhores!</h1>
+    <p>Mais do que produtos, entregamos cuidado, carinho e autoestima para os pequenos brilharem todos os dias. Toque em cada produto e deixe o mascote te contar todos os segredos!</p>
+    <div class="hero-ctas">
+      <a href="#produtos" class="btn-primary">Ver a linha completa ↓</a>
+      <a href="https://wa.me/5562394234" target="_blank" rel="noopener" class="btn-secondary">Falar no WhatsApp</a>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="data:image/jpeg;base64,__HERO__" alt="Mascotes Cosmile Kids segurando produtos">
+    <div class="badge-float badge-1">🌿 Fórmulas suaves</div>
+    <div class="badge-float badge-2">🔬 Testado dermato-logicamente</div>
+  </div>
+</section>
+
+<div class="section-head" id="produtos">
+  <span class="kicker">Conheça toda a linha</span>
+  <h2>Escolha um produto e desperte o mascote</h2>
+  <p>Cada personagem é especialista no próprio produto — clique para ele contar, com suas palavras, a composição e pra que serve!</p>
+</div>
+
+<div class="grid">
+__CARDS__
+</div>
+
+<div class="strip">
+  <div class="strip-inner">
+    <h3>💜 Uma linha completa para cada momento!</h3>
+    <p>Produtos desenvolvidos especialmente para cuidar, proteger e valorizar os cabelos das crianças com suavidade e muita diversão. Fórmulas suaves, seguras e dermatologicamente testadas.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-logo">CoSmile Kids ✦</div>
+  <div class="foot-contact">📷 @cosmilekids &nbsp;•&nbsp; 💬 (62) 3942-3434</div>
+  <div class="foot-note">Feito com amor para cuidar de quem você mais ama.</div>
+</footer>
+
+__MODALS__
+
+<script>
+  function openModal(id){
+    document.getElementById('modal-'+id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id){
+    document.getElementById('modal-'+id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function switchTab(id, tab){
+    const modal = document.getElementById('modal-'+id);
+    modal.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    modal.querySelectorAll('[data-tab-content]').forEach(el => {
+      el.hidden = el.getAttribute('data-tab-content') !== tab;
+    });
+  }
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'), document.body.style.overflow=''; });
+  });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open'));
+      document.body.style.overflow = '';
+    }
+  });
+</script>
+
+</body>
+</html>
+'''
+
+html = html.replace('__CARDS__', cards_joined).replace('__MODALS__', modals_joined).replace('__HERO__', hero_b64)
+
+with open('/home/claude/site/index.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+
+print("OK", len(html))
